@@ -1,4 +1,4 @@
-cryptos <- read.csv2("C:/Users/Eleve/Desktop/script03012022/crypto.csv")
+cryptos <- read.csv2("C:/Users/Eleve/OneDrive/Bureau/programmes/Data_Science/crypto.csv")
 
 cryptos <-transform(cryptos, quoteEURmarket_cap_dominance = as.numeric(quoteEURmarket_cap_dominance))
 
@@ -7,7 +7,7 @@ cryptosTop <- cryptos[cryptos$quoteEURmarket_cap_dominance > 3,]
 
 
 # Telechargement du fichier donnees bicoin
-data_bitcoin <- read.csv2("C:/Users/Eleve/Desktop/script03012022/Bitcoin2017-2022Journalie.csv");
+data_bitcoin <- read.csv2("C:/Users/Eleve/OneDrive/Bureau/programmes/Data_Science/Bitcoin2017-2022Journalie.csv");
 Close_integer_bitcoin<-as.integer(data_bitcoin$Close);
 date_convertit_bitcoin<-dmy(data_bitcoin$Date);
 #selection des donnees
@@ -16,11 +16,11 @@ date_convertit_bitcoin<-dmy(data_bitcoin$Date);
 data_bitcoin_moyenne_2020 = c()
 
 for(m in seq(1,12)) {
-  data_bitcoin_moyenne_2020 <-c(data_bitcoin_moyenne_2020, mean(Close_integer_bitcoin[year(date_convertit_bitcoin) == 2021 & month(date_convertit_bitcoin) == m]))
+  data_bitcoin_moyenne_2020 <-c(data_bitcoin_moyenne_2020, mean(Close_integer_bitcoin[year(date_convertit_bitcoin) == 2020 & month(date_convertit_bitcoin) == m]))
 }
 
 # Telechargement du fichier donnees Ether
-data_ether <- read.csv2("C:/Users/Eleve/Desktop/script03012022/Ethereum2017-2022Journalie.csv");
+data_ether <- read.csv2("C:/Users/Eleve/OneDrive/Bureau/programmes/Data_Science/Ethereum2017-2022Journalie.csv");
 Close_integer_ether<-as.integer(data_ether$Close);
 date_convertit_ether<-dmy(data_ether$Date);
 #selection des donnees
@@ -29,7 +29,7 @@ date_convertit_ether<-dmy(data_ether$Date);
 data_ether_moyenne_2020 = c()
 
 for(m in seq(1,12)) {
-  data_ether_moyenne_2020 <-c(data_ether_moyenne_2020, mean(Close_integer_ether[year(date_convertit_ether) == 2021 & month(date_convertit_ether) == m]))
+  data_ether_moyenne_2020 <-c(data_ether_moyenne_2020, mean(Close_integer_ether[year(date_convertit_ether) == 2020 & month(date_convertit_ether) == m]))
 }
 
 
@@ -58,7 +58,8 @@ sidebar <- dashboardSidebar(
     menuItem("Charts", icon = icon("chart-bar"),
              menuSubItem("Bitcoin", tabName = "Bitcoin"),
              menuSubItem("Ether", tabName = "Ether")
-    )
+    ),
+    menuItem("Prediction", tabName = "prediction", icon = icon("eye"))
   )
 )
 
@@ -74,13 +75,10 @@ body <- dashboardBody(
               )
             ),
             fluidRow(
-              
-              
               infoBox(width = 6, "Bitcoin Market Cap", cryptos$quoteEURmarket_cap[cryptos$name == "Bitcoin"], icon = icon("credit-card"), fill = TRUE),
               infoBox(width = 6, "Ether Market Cap", cryptos$quoteEURmarket_cap[cryptos$name == "Ethereum"], icon = icon("credit-card"), fill = TRUE)
-              
-              
             ),
+            
             fluidRow(
               box(status = "primary",
                   title = "Portefeuille client",
@@ -128,10 +126,31 @@ body <- dashboardBody(
               box(
                 title = "Annee",
                 width=12,
-                sliderInput("sliderEther", "Number of observations:",min = 2017, max = 2022, value = 2020, step = 1)
+                sliderInput("sliderEther", "Number of observations:", min = 2017, max = 2022, value = 2020, step = 1)
               )
             )
-    )
+    ),
+    tabItem(tabName = "prediction",
+            box(
+              status = "primary",
+              title = "Evolution du ether",
+              width=12,
+              plotOutput("plot4")
+            ),
+            
+            box(
+              title = "Somme investie",
+              width=6,
+              sliderInput("investissement_euro", "investisement:", min = 1000, max = 5000, value = 3000, step = 500),
+            ),
+            
+            box(
+              title = "Date",
+              width=6,
+              sliderInput("nbr_annee", "nombre d'annees", min = 1, max = 10, value = 1)
+            )
+            
+          )
   )
 )
 
@@ -188,6 +207,22 @@ shinyApp(
               names.arg = c("01","02","03","04","05","06","07","08", "09","10","11","12"),
               ylab = "valeur moyenne ($)"
       )
+    })
+    output$plot4 <- renderPlot({
+      mylist <- c()
+      for(m in seq(1,input$nbr_annee)) {
+        
+        benefice <- input$investissement_euro * 1.12
+        mylist <- c(mylist, benefice)
+        
+      }
+      barplot(mylist,
+              col = "blue",
+              main = "Evolution du bitcoin" ,
+              xlab = "Mois",
+              ylab = "valeur moyenne ($)"
+      )
+      
     })
   
   }
