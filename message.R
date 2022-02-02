@@ -147,7 +147,7 @@ body <- dashboardBody(
             box(
               title = "Date",
               width=6,
-              sliderInput("nbr_annee", "nombre d'annees", min = 1, max = 10, value = 1)
+              sliderInput("nbr_annee", "nombre d'annees:", min = 1, max = 10, value = 1)
             )
             
           )
@@ -210,11 +210,12 @@ shinyApp(
     })
     output$plot4 <- renderPlot({
       mylist <- c()
+      coefficient <- 0.12
       for(m in seq(1,input$nbr_annee)) {
-        
-        benefice <- input$investissement_euro * 1.12
-        mylist <- c(mylist, benefice)
-        
+        coefficient_multiplicateur <- 1 + coefficient
+        benefice <- (input$investissement_euro * coefficient_multiplicateur) - input$investissement_euro
+                     mylist <- c(mylist, benefice)
+                     coefficient <- coefficient + 0.12
       }
       barplot(mylist,
               col = "blue",
