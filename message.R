@@ -1,4 +1,4 @@
-cryptos <- read.csv2("C:/Users/Eleve/OneDrive/Bureau/programmes/Data_Science/crypto.csv")
+cryptos <- read.csv2("C:/Users/Eleve/Desktop/script03012022/crypto.csv")
 
 cryptos <-transform(cryptos, quoteEURmarket_cap_dominance = as.numeric(quoteEURmarket_cap_dominance))
 
@@ -7,7 +7,7 @@ cryptosTop <- cryptos[cryptos$quoteEURmarket_cap_dominance > 3,]
 
 
 # Telechargement du fichier donnees bicoin
-data_bitcoin <- read.csv2("C:/Users/Eleve/OneDrive/Bureau/programmes/Data_Science/Bitcoin2017-2022Journalie.csv");
+data_bitcoin <- read.csv2("C:/Users/Eleve/Desktop/script03012022/Bitcoin2017-2022Journalie.csv");
 Close_integer_bitcoin<-as.integer(data_bitcoin$Close);
 date_convertit_bitcoin<-dmy(data_bitcoin$Date);
 #selection des donnees
@@ -150,7 +150,7 @@ body <- dashboardBody(
               sliderInput("nbr_annee", "nombre d'annees:", min = 1, max = 10, value = 1)
             )
             
-          )
+    )
   )
 )
 
@@ -159,14 +159,15 @@ shinyApp(
   server = function(input, output) {
     output$plot1 <-  renderPlot({
       
+      mycols <- c("#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF")
       
-      
-      ggplot(cryptosTop, aes(x = "", y = quoteEURmarket_cap
-                             , fill = name)) +
+      ggplot(cryptosTop, aes(x = "", y = quoteEURmarket_cap, fill = name)) +
         geom_bar(width = 1, stat = "identity", color = "white") +
         coord_polar("y", start = 0)+
-        geom_text(aes(y = quoteEURmarket_cap, label = quoteEURmarket_cap), color = "white")+
+        geom_text(aes(y = , label = name), color = "white")+
+        scale_fill_manual(values = mycols) +
         theme_void()
+      
       
       
     })
@@ -210,21 +211,35 @@ shinyApp(
     })
     output$plot4 <- renderPlot({
       mylist <- c()
+      mylistInvest <- c()
+      matrice <- c()
       coefficient <- 0.12
+      argument <- 1
+      arguments <- c()
+      
       for(m in seq(1,input$nbr_annee)) {
         coefficient_multiplicateur <- 1 + coefficient
         benefice <- (input$investissement_euro * coefficient_multiplicateur) - input$investissement_euro
-                     mylist <- c(mylist, benefice)
-                     coefficient <- coefficient + 0.12
+        beneficeInvest <- input$investissement_euro
+        
+        mylist <- c(mylist, benefice)
+        mylistInvest <- c(mylistInvest, beneficeInvest)
+        arguments <- c(arguments, argument)
+        
+        matrice <- rbind(mylistInvest,mylist)
+        coefficient <- coefficient + 0.12
+        argument <- argument + 1
       }
-      barplot(mylist,
-              col = "blue",
+      barplot(matrice,
+              col = c("blue","red"),
               main = "Evolution du bitcoin" ,
-              xlab = "Mois",
-              ylab = "valeur moyenne ($)"
+              xlab = "Années",
+              names.arg = arguments,
+              ylab = "Patrimoine en euros"
       )
+      legend(x="bottomleft",legend=c("Bénéfice","Investissement"),fill=c("red","blue"))
       
     })
-  
+    
   }
 )
