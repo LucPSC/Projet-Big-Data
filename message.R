@@ -59,7 +59,8 @@ sidebar <- dashboardSidebar(
              menuSubItem("Bitcoin", tabName = "Bitcoin"),
              menuSubItem("Ether", tabName = "Ether")
     ),
-    menuItem("Prediction", tabName = "prediction", icon = icon("eye"))
+    menuItem("Prediction Bitcoin", tabName = "predictionBitcoin", icon = icon("eye")),
+    menuItem("Prediction Ether", tabName = "predictionEther", icon = icon("eye"))
   )
 )
 
@@ -130,7 +131,7 @@ body <- dashboardBody(
               )
             )
     ),
-    tabItem(tabName = "prediction",
+    tabItem(tabName = "predictionBitcoin",
             box(
               status = "primary",
               title = "Evolution du ether",
@@ -150,6 +151,27 @@ body <- dashboardBody(
               sliderInput("nbr_annee", "nombre d'annees:", min = 1, max = 10, value = 1)
             )
             
+    ),
+    tabItem(tabName = "predictionEther",
+            box(
+              status = "primary",
+              title = "Evolution du ether",
+              width=12,
+              plotOutput("plot5")
+            ),
+            
+            box(
+              title = "Somme investie",
+              width=6,
+              sliderInput("investissement_euro_ether", "investisement:", min = 1000, max = 5000, value = 3000, step = 500),
+            ),
+            
+            box(
+              title = "Date",
+              width=6,
+              sliderInput("nbr_annee_ether", "nombre d'annees:", min = 1, max = 10, value = 1)
+            )
+            
     )
   )
 )
@@ -160,11 +182,13 @@ shinyApp(
     output$plot1 <-  renderPlot({
       
       mycols <- c("#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF")
+      nomCrypto <- c("Bitcoin", "BNB", "Ethereum", "Tether")
       
-      ggplot(cryptosTop, aes(x = "", y = quoteEURmarket_cap, fill = name)) +
+      ggtitle("label") # pour le titre principal
+      ggplot(cryptosTop, aes(x = "", y = quoteEURmarket_cap, fill = nomCrypto)) +
         geom_bar(width = 1, stat = "identity", color = "white") +
         coord_polar("y", start = 0)+
-        geom_text(aes(y = , label = name), color = "white")+
+        geom_text(aes(y = , label = ""), color = "white")+
         scale_fill_manual(values = mycols) +
         theme_void()
       
@@ -218,6 +242,7 @@ shinyApp(
       arguments <- c()
       
       for(m in seq(1,input$nbr_annee)) {
+        
         coefficient_multiplicateur <- 1 + coefficient
         benefice <- (input$investissement_euro * coefficient_multiplicateur) - input$investissement_euro
         beneficeInvest <- input$investissement_euro
@@ -229,6 +254,7 @@ shinyApp(
         matrice <- rbind(mylistInvest,mylist)
         coefficient <- coefficient + 0.12
         argument <- argument + 1
+        
       }
       barplot(matrice,
               col = c("blue","red"),
@@ -240,6 +266,38 @@ shinyApp(
       legend(x="bottomleft",legend=c("Bénéfice","Investissement"),fill=c("red","blue"))
       
     })
+    output$plot5 <- renderPlot({
+      mylist5 <- c()
+      mylistInvest5 <- c()
+      matrice5 <- c()
+      coefficient5 <- 1.91
+      argument5 <- 1
+      arguments5 <- c()
+      
+      for(m5 in seq(1,input$nbr_annee_ether)) {
+        coefficient_multiplicateur5 <- 1 + coefficient5
+        benefice5 <- (input$investissement_euro_ether * coefficient_multiplicateur5) - input$investissement_euro_ether
+        beneficeInvest5 <- input$investissement_euro
+        
+        mylist5 <- c(mylist5, benefice5)
+        mylistInvest5 <- c(mylistInvest5, beneficeInvest5)
+        arguments5 <- c(arguments5, argument5)
+        
+        matrice5 <- rbind(mylistInvest5,mylist5)
+        coefficient5 <- coefficient5 + 1.91
+        argument5 <- argument5 + 1
+      }
+      barplot(matrice5,
+              col = c("blue","red"),
+              main = "Evolution du Ether" ,
+              xlab = "Années",
+              names.arg = arguments5,
+              ylab = "Patrimoine en euros"
+      )
+      legend(x="bottomleft",legend=c("Bénéfice","Investissement"),fill=c("red","blue"))
+      
+    })
+    
     
   }
 )
