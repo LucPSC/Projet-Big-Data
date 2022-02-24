@@ -1,4 +1,4 @@
-cryptos <- read.csv2("C:/Users/Eleve/Desktop/script03012022/crypto.csv")
+cryptos <- read.csv2("C:/script03012022/crypto.csv")
 
 cryptos <-transform(cryptos, quoteEURmarket_cap_dominance = as.numeric(quoteEURmarket_cap_dominance))
 
@@ -7,7 +7,7 @@ cryptosTop <- cryptos[cryptos$quoteEURmarket_cap_dominance > 3,]
 
 
 # Telechargement du fichier donnees bicoin
-data_bitcoin <- read.csv2("C:/Users/Eleve/Desktop/script03012022/Bitcoin2017-2022Journalie.csv");
+data_bitcoin <- read.csv2("C:/script03012022/Bitcoin2017-2022Journalie.csv");
 Close_integer_bitcoin<-as.integer(data_bitcoin$Close);
 date_convertit_bitcoin<-dmy(data_bitcoin$Date);
 #selection des donnees
@@ -20,7 +20,7 @@ for(m in seq(1,12)) {
 }
 
 # Telechargement du fichier donnees Ether
-data_ether <- read.csv2("C:/Users/Eleve/OneDrive/Bureau/programmes/Data_Science/Ethereum2017-2022Journalie.csv");
+data_ether <- read.csv2("C:/script03012022/Ethereum2017-2022Journalie.csv");
 Close_integer_ether<-as.integer(data_ether$Close);
 date_convertit_ether<-dmy(data_ether$Date);
 #selection des donnees
@@ -202,17 +202,32 @@ shinyApp(
       data_bitcoin_moyenne_2020 = c()
       
       for(m in seq(1,12)) {
-        data_bitcoin_moyenne_2020 <-c(data_bitcoin_moyenne_2020, mean(Close_integer_bitcoin[year(date_convertit_bitcoin) == input$sliderBitcoin & month(date_convertit_bitcoin) == m]))
+        data_bitcoin_moyenne_2020 <-c(data_bitcoin_moyenne_2020, round(mean(Close_integer_bitcoin[year(date_convertit_bitcoin) == input$sliderBitcoin & month(date_convertit_bitcoin) == m])))
       }
       
       #Representation graphique
-      barplot(data_bitcoin_moyenne_2020,
-              col = "blue",
-              main = "Evolution du bitcoin" ,
-              xlab = "Mois",
-              names.arg = c("01","02","03","04","05","06","07","08", "09","10","11","12"),
-              ylab = "valeur moyenne ($)"
+      barres2 <- barplot(data_bitcoin_moyenne_2020,
+                         col = "blue",
+                         main = "Evolution du bitcoin" ,
+                         xlab = "Mois",
+                         names.arg = c("01","02","03","04","05","06","07","08", "09","10","11","12"),
+                         ylab = "valeur moyenne ($)"
       )
+      for(i in seq(1,12)) {
+        text(barres2[i], data_bitcoin_moyenne_2020[i]-(data_bitcoin_moyenne_2020[i] * 0.1), col='white', data_bitcoin_moyenne_2020[i])
+      }
+      
+      # tableau <- c()
+      # #Conversion en DataFrame
+      # for(i in seq(1,12)) {
+      #   tableau <- rbind(tableau, data.frame(x = c("01","02","03","04","05","06","07","08", "09","10","11","12"), y = data_bitcoin_moyenne_2020))
+      # }
+      # 
+      # # Créer le barplot
+      # ggplot(data=tableau, aes(x='mois', y=tableau$y)) +
+      #   geom_bar(stat="identity", fill = "#FF6666")+
+      #   geom_text(aes(y=tableau$y, label='valeur moyenne ($)'), vjust=1.6, 
+      #             color="white", position = position_dodge(0.9), size=3.5)+ theme_minimal()
     })
     
     output$plot3 <-  renderPlot({
@@ -221,17 +236,23 @@ shinyApp(
       data_ether_moyenne_2020 = c()
       
       for(m in seq(1,12)) {
-        data_ether_moyenne_2020 <-c(data_ether_moyenne_2020, mean(Close_integer_ether[year(date_convertit_ether) == input$sliderEther & month(date_convertit_ether) == m]))
+        data_ether_moyenne_2020 <-c(data_ether_moyenne_2020, round(mean(Close_integer_ether[year(date_convertit_ether) == input$sliderEther & month(date_convertit_ether) == m])))
       }
       
-      #Representation graphique
-      barplot(data_ether_moyenne_2020,
-              col = "blue",
-              main = "Evolution du bitcoin" ,
-              xlab = "Mois",
-              names.arg = c("01","02","03","04","05","06","07","08", "09","10","11","12"),
-              ylab = "valeur moyenne ($)"
+      # #Representation graphique
+      barres3 <- barplot(data_ether_moyenne_2020,
+                         col = "blue",
+                         main = "Evolution du Ether" ,
+                         xlab = "Mois",
+                         names.arg = c("01","02","03","04","05","06","07","08", "09","10","11","12"),
+                         ylab = "valeur moyenne ($)"
       )
+      for(i in seq(1,12)) {
+        text(barres3[i], data_ether_moyenne_2020[i]-(data_ether_moyenne_2020[i] * 0.1), col='white', data_ether_moyenne_2020[i])
+      }
+      
+      
+      
     })
     output$plot4 <- renderPlot({
       mylist <- c()
@@ -244,7 +265,7 @@ shinyApp(
       for(m in seq(1,input$nbr_annee)) {
         
         coefficient_multiplicateur <- 1 + coefficient
-        benefice <- (input$investissement_euro * coefficient_multiplicateur) - input$investissement_euro
+        benefice <- round((input$investissement_euro * coefficient_multiplicateur) - input$investissement_euro)
         beneficeInvest <- input$investissement_euro
         
         mylist <- c(mylist, benefice)
@@ -256,14 +277,18 @@ shinyApp(
         argument <- argument + 1
         
       }
-      barplot(matrice,
-              col = c("blue","red"),
-              main = "Evolution du bitcoin" ,
-              xlab = "AnnÃ©es",
-              names.arg = arguments,
-              ylab = "Patrimoine en euros"
+      barres <- barplot(matrice,
+                        col = c("#78281f","#0e6251"),
+                        main = "Evolution du bitcoin" ,
+                        xlab = "Années",
+                        names.arg = arguments,
+                        ylab = "Patrimoine en euros"
       )
-      legend(x="bottomleft",legend=c("BÃ©nÃ©fice","Investissement"),fill=c("red","blue"))
+      legend(x="topleft",legend=c("Bénéfice","Investissement"),fill=c("#0e6251","#78281f"))
+      for(ii in seq(1,input$nbr_annee)) {
+        text(barres[ii], mylistInvest[ii]/2, col='white', mylistInvest[ii])
+        text(barres[ii], (mylist[ii]/2)+mylistInvest[ii], col='white', mylist[ii])
+      }
       
     })
     output$plot5 <- renderPlot({
@@ -273,11 +298,13 @@ shinyApp(
       coefficient5 <- 1.91
       argument5 <- 1
       arguments5 <- c()
+      #initialisation DataFrame
+      tableau <- data.frame(x = c(), y = c()) 
       
       for(m5 in seq(1,input$nbr_annee_ether)) {
         coefficient_multiplicateur5 <- 1 + coefficient5
-        benefice5 <- (input$investissement_euro_ether * coefficient_multiplicateur5) - input$investissement_euro_ether
-        beneficeInvest5 <- input$investissement_euro
+        benefice5 <- round((input$investissement_euro_ether * coefficient_multiplicateur5) - input$investissement_euro_ether)
+        beneficeInvest5 <- input$investissement_euro_ether
         
         mylist5 <- c(mylist5, benefice5)
         mylistInvest5 <- c(mylistInvest5, beneficeInvest5)
@@ -286,15 +313,45 @@ shinyApp(
         matrice5 <- rbind(mylistInvest5,mylist5)
         coefficient5 <- coefficient5 + 1.91
         argument5 <- argument5 + 1
+        
       }
-      barplot(matrice5,
-              col = c("blue","red"),
-              main = "Evolution du Ether" ,
-              xlab = "AnnÃ©es",
-              names.arg = arguments5,
-              ylab = "Patrimoine en euros"
+      barres5 <- barplot(matrice5,
+                         col = c("#78281f","#0e6251"),
+                         main = "Evolution du Ether" ,
+                         xlab = "Années",
+                         names.arg = arguments5,
+                         ylab = "Patrimoine en euros",
       )
-      legend(x="bottomleft",legend=c("BÃ©nÃ©fice","Investissement"),fill=c("red","blue"))
+      legend(x="topleft",legend=c("Bénéfice","Investissement"),fill=c("#0e6251","#78281f"))
+      for(i in seq(1,input$nbr_annee_ether)) {
+        text(barres5[i], mylistInvest5[i]/2, col='white', mylistInvest5[i])
+        text(barres5[i], (mylist5[i]/2)+mylistInvest5[i], col='white', mylist5[i])
+        tableau <- rbind(tableau, data.frame(x = mylistInvest5[i], y = mylist5[i]))
+      }
+      # 
+      # print(tableau)
+      #print(mylistInvest5)
+      # #Conversion en DataFrame
+      # for(i in seq(1,input$nbr_annee_ether)) {
+      #   tableau <- rbind(tableau, data.frame(x = 'Investissement', y = mylistInvest5[i], annee = i))
+      # }
+      # 
+      # for(i in seq(1,input$nbr_annee_ether)) {
+      #   tableau <- rbind(tableau, data.frame(x = 'Benefice', y = mylist5[i], annee = i))
+      # }
+      # print(tableau)
+      # 
+      # # Créer le barplot
+      # ggplot(data=tableau, aes(x=tableau$annee, y=tableau$y, fill=tableau$x)) +
+      #   geom_bar(stat="identity")+
+      #   geom_text(aes(y=tableau$y, label=tableau$y), vjust=1.6, 
+      #             color="white", size=3.5)+ scale_fill_brewer(palette="Paired")+ theme_minimal()
+      
+      # ggplot(data=tableau, aes(x=arguments5, y=tableau$x)) +
+      #   geom_bar(stat="identity")+
+      #   geom_text(aes(y=tableau$x, label=tableau$x), vjust=1.6, 
+      #             color="white", size=3.5)+ theme_minimal()
+      
       
     })
     
